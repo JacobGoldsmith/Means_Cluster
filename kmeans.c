@@ -30,12 +30,12 @@ void k_means_cluster(int k, int max_it, char *input_filename, char *output_filen
     n = sizeof(vectors)/vec_size;
 
     // Allocating memory for centroids and copying first k vectors from vectors in to centroids
-    float **centroids = malloc((k)*sizeof(float*));
-    assert(centroids!=NULL);
+    float **centroids = (float**)malloc((k)*sizeof(float*));
+    //assert(centroids!=NULL);
 
     for (i = 0; i<k; i++){
-        centroids[i] = malloc(vec_size*sizeof(float));
-        assert(centroids[i]!=NULL);
+        centroids[i] = (float*)malloc(vec_size*sizeof(float));
+        //assert(centroids[i]!=NULL);
         for(j = 0; j < vec_size; j++){
             centroids[i][j] = vectors[i][j];
         }
@@ -43,13 +43,13 @@ void k_means_cluster(int k, int max_it, char *input_filename, char *output_filen
 
 
     // Initializing sums and counts and allocating memory with starting values 0
-    int *counts = malloc(k*sizeof(int));
-    assert(counts!=NULL);
-    float **sums = malloc(k * sizeof (float *));
-    assert(sums!=NULL);
+    int *counts = (int*)malloc(k*sizeof(int));
+    //assert(counts!=NULL);
+    float **sums = (float**)malloc(k * sizeof (float *));
+    //assert(sums!=NULL);
     for(j = 0; j < k; j++){
-        sums[j] = malloc(vec_size*sizeof(float));
-        assert(sums[j]!=NULL);
+        sums[j] = (float*)malloc(vec_size*sizeof(float));
+        //assert(sums[j]!=NULL);
     }
     // Cluster dividing
     for(i = 0; i < max_it; i++){
@@ -91,12 +91,43 @@ void k_means_cluster(int k, int max_it, char *input_filename, char *output_filen
 
 // Read file and create array of vectors
 float **collect(char *input_filename){
+    int i, c, j, sum_vectors,vector_size, sum_cords = 0;
+
     FILE *ifp = NULL;
     ifp = fopen(input_filename, "r");
-    assert(ifp!=NULL);
+    //assert(ifp!=NULL);
 
+    // Finding size of vector and amount of vectors
+    while ( ( c = fgetc( ifp ) ) != EOF ) {
+        if ( c == '\n' ){
+            sum_vectors++;
+            sum_cords++;
+        }
+        else if (c == ',')
+        {
+            sum_cords++;
+        }
+    }
+    vector_size = sum_cords/sum_vectors;
 
+    // Allocating memory for array of vectors
+    float **vectors = (float**)malloc(sum_vectors*sizeof(float*));
+    //assert(vectors!=NULL);
+    for (i = 0; i < sum_vectors; i++){
+        vectors[i] = (float*)malloc(vector_size*sizeof(float));
+        //assert(vectors[i]!=NULL);
+    }
 
+    // Load file as floats in to array vectors
+    
+    for (i = 0; i < sum_vectors; i++){
+        for (j = 0; j < sum_cords/sum_vectors; j++){
+            fscanf(ifp, "%f,", &vectors[i][j]);
+        }
+    }
 
+    printf("%f ", vectors[2][2]);
     fclose(ifp);
+
+    return vectors;
 }
